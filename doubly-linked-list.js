@@ -1,6 +1,7 @@
 const assert = require('assert')
 
 class Node {
+
     constructor(data, next = null, prev = null) {
         this.data = data
         this.next = next
@@ -8,7 +9,7 @@ class Node {
     }
 }
 
-class DoublyLinkedList {
+class DoublyLinkedList {                                                 
     #size = 0
     #head = null
     #tail = null
@@ -35,23 +36,43 @@ class DoublyLinkedList {
             throw new Error(`${index} is out of range!`)
         }
 
-        let current = this.#head
-        let prev = null
-
-        if (index === 0) {
-            this.#head = current.next
+        const middle = Math.round(this.#size / 2)        
+        let current = this.#tail
+        let next = null
+        let prev = current.prev
+        if(index >= middle) {    
+            if(index === this.#size) {
+                this.#tail = current.prev     
+                prev.next = null      
+            } else {
+                for(let i = this.#size - 2; i >= index; i--) {
+                    next = current
+                    current = next.prev
+                    prev = current.prev
+                    if(index === i) {
+                        prev.next = current.next
+                        next.prev = current.prev
+                    }
+                }
+            }
         } else {
-            // TODO починить функцию remove, чтобы она работала корректно
-            // Пример в getData
-            for (let i = 1; i <= index; i++)  {
-                prev = current
-                current = prev.next
-                if (index === i) {
-                    prev.next = current.next
+            current = this.#head
+            prev = null
+            next = this.#head.next
+            if(index === 0) {
+                this.#head = this.#head.next
+            } else{
+                for(let i = 1; i <= index; i++) {
+                    prev = current
+                    current = prev.next
+                    next = current.next
+                    if(index === i) {
+                        next.prev = current.prev
+                        prev.next = current.next
+                    }
                 }
             }
         }
-
         this.#size--
     }
 
@@ -94,7 +115,8 @@ class DoublyLinkedList {
 
     // TODO вернуть средний индекс списка
     get listMid () {
-        return this.#head
+        const mid = Math.round(this.#size / 2)
+        return mid
     }
 
     // TODO вернуть массив всех значений элементов
@@ -102,12 +124,37 @@ class DoublyLinkedList {
     // Если 1, то результат должен быть упорядочен с head -> tail
     // Если 0 то, tail -> head
     toArray(direction = 1) {
-        return []
+        let arr = []
+        let current = this.#head
+        if (direction === 0) {
+            current = this.#tail
+            while(current.prev) {
+                arr.push(current.data)
+                current = current.prev
+            }
+            arr.push(this.#head.data)
+            return arr
+        }
+        while(current.next) {
+            arr.push(current.data)
+            current = current.next
+        }
+        arr.push(this.#tail.data)
+        return arr
     }
 
     // TODO удалить все элементы, значение которых уже встретилось в связанном списке.
     removeDuplicates () {
-
+        let arr = this.toArray()
+        let uniqArr = []
+        arr.forEach((node, index) => {
+            if(!uniqArr.includes(node)) {
+                uniqArr.push(node)
+            } else {
+                console.log(node, index, this.#size)
+                this.remove(index)
+            }
+        })
     }
 
     printList () {
@@ -137,4 +184,15 @@ console.log('value', value)
 console.log('size', linkedList.size)
 console.log('head', linkedList.head)
 console.log('tail', linkedList.tail)
+linkedList.printList()
+linkedList.remove(2)
+linkedList.remove(4)
+linkedList.printList()
+console.log('mid', linkedList.listMid) 
+console.log('array', linkedList.toArray())
+console.log('array', linkedList.toArray(0))
+linkedList.append(20)
+linkedList.append(40)
+linkedList.printList()
+linkedList.removeDuplicates()
 linkedList.printList()
